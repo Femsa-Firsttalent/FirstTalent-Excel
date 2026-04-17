@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Talent · Evaluación Excel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #E8192C;
+  --red-dark: #B50E1E;
+  --red-deep: #7A0010;
+  --black: #0A0A0A;
+  --black-2: #141414;
+  --black-3: #1E1E1E;
+  --black-4: #2A2A2A;
+  --white: #FFFFFF;
+  --white-70: rgba(255,255,255,0.7);
+  --white-30: rgba(255,255,255,0.3);
+  --white-10: rgba(255,255,255,0.1);
+  --white-05: rgba(255,255,255,0.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* ── PAGE WRAPPER ── */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1rem 4rem;
+}
+
+/* ── TOP HEADER STRIPE ── */
+.top-bar {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0 2rem;
+  border-bottom: 1px solid var(--white-10);
+  margin-bottom: 2.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--red);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(232,25,44,0.5);
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--white-70);
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  font-weight: 300;
+}
+
+.badge-year {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 4px 10px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+}
+
+/* ── MAIN CONTAINER ── */
+.wrap {
+  width: 100%;
+  max-width: 680px;
+}
+
+/* ── SCREENS ── */
+.scr { display: none; }
+.scr.on { display: block; animation: fadeUp 0.35s ease forwards; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--black-2);
+  border: 1px solid var(--white-10);
+  border-radius: 12px;
+  padding: 1.75rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), transparent);
+}
+
+/* ── HERO HEADLINE ── */
+.hero-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(38px, 8vw, 64px);
+  letter-spacing: 3px;
+  line-height: 0.95;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.hero-title span {
+  color: var(--red);
+  text-shadow: 0 0 30px rgba(232,25,44,0.4);
+}
+
+.hero-sub {
+  font-size: 14px;
+  color: var(--white-70);
+  line-height: 1.7;
+  margin-bottom: 1.75rem;
+  max-width: 480px;
+  font-weight: 300;
+}
+
+/* ── FORM ── */
+.fld { margin-bottom: 1.1rem; }
+
+label, lbl {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--white-70);
+  margin-bottom: 7px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--black-3);
+  border: 1px solid var(--white-10);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+  -webkit-appearance: none;
+}
+
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.3); }
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(232,25,44,0.15);
+}
+
+select option { background: var(--black-3); color: var(--white); }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 11px 22px;
+  border-radius: 8px;
+  border: 1px solid var(--white-10);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--white-70);
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.18s;
+  letter-spacing: 0.3px;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--white-10);
+  color: var(--white);
+}
+
+.btn.pri {
+  background: var(--red);
+  color: var(--white);
+  border-color: var(--red);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(232,25,44,0.35);
+}
+
+.btn.pri:hover:not(:disabled) {
+  background: var(--red-dark);
+  box-shadow: 0 4px 24px rgba(232,25,44,0.5);
+  transform: translateY(-1px);
+}
+
+.btn.pri:active { transform: translateY(0); }
+
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-full { width: 100%; text-align: center; padding: 14px 22px; font-size: 15px; }
+
+/* ── PROGRESS ── */
+.prog-wrap {
+  margin-bottom: 1.5rem;
+}
+
+.prog-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.prog-label {
+  font-size: 12px;
+  color: var(--white-70);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+.prog-lvl {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  background: rgba(232,25,44,0.12);
+  border: 1px solid rgba(232,25,44,0.3);
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+
+.pb {
+  height: 3px;
+  background: var(--white-10);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pf {
+  height: 3px;
+  background: linear-gradient(90deg, var(--red-dark), var(--red));
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 8px rgba(232,25,44,0.6);
+}
+
+/* ── QUESTION ── */
+.qt {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 1.25rem;
+  line-height: 1.55;
+}
+
+/* ── OPTIONS ── */
+.opts { display: flex; flex-direction: column; gap: 9px; }
+
+.opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--white-10);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.16s;
+  background: var(--black-3);
+}
+
+.opt:hover { border-color: var(--white-30); background: var(--black-4); }
+
+.opt.sel {
+  border-color: var(--red);
+  background: rgba(232,25,44,0.08);
+}
+
+.opt.sel .ol {
+  background: var(--red);
+  color: var(--white);
+  box-shadow: 0 0 12px rgba(232,25,44,0.5);
+}
+
+.ol {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--black-4);
+  border: 1px solid var(--white-10);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--white-70);
+  transition: all 0.16s;
+}
+
+.ot {
+  font-size: 14px;
+  color: var(--white-70);
+  line-height: 1.5;
+  padding-top: 3px;
+  transition: color 0.16s;
+}
+
+.opt.sel .ot { color: var(--white); }
+
+/* ── NAV ── */
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.25rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--white-30);
+}
+
+/* ── HINT BOX ── */
+.hint {
+  background: rgba(232,25,44,0.07);
+  border: 1px solid rgba(232,25,44,0.25);
+  border-left: 3px solid var(--red);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--white-70);
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+}
+
+/* ── THANKS SCREEN ── */
+.thanks-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(50,180,80,0.12);
+  border: 1px solid rgba(50,180,80,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+/* ── PIN ── */
+.pin-box {
+  max-width: 160px;
+  margin: 0 auto 1rem;
+  text-align: center;
+  letter-spacing: 12px;
+  font-size: 24px;
+  font-weight: 500;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── RESULTS ── */
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--white);
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(232,25,44,0.35);
+}
+
+.lbadge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.mg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.mc {
+  background: var(--black-3);
+  border: 1px solid var(--white-10);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+
+.mn {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 26px;
+  letter-spacing: 1px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.ml {
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  color: var(--white-30);
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.bw { margin: 6px 0; }
+
+.bb {
+  height: 4px;
+  background: var(--white-10);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bf {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--red-dark), var(--red));
+  box-shadow: 0 0 6px rgba(232,25,44,0.5);
+}
+
+.sl {
+  font-size: 12px;
+  color: var(--white-30);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+  font-family: 'DM Mono', monospace;
+}
+
+.dvd {
+  height: 1px;
+  background: var(--white-10);
+  margin: 1.25rem 0;
+}
+
+.reco-i {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--white-70);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.rdot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+  margin-top: 6px;
+  box-shadow: 0 0 6px rgba(232,25,44,0.6);
+}
+
+/* ── ERROR ── */
+.err {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 8px;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.3px;
+}
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 0.5rem;
+}
+
+.field-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+/* ── DECORATIVE LINE ── */
+.dec-line {
+  height: 1px;
+  background: linear-gradient(90deg, var(--red), transparent);
+  margin: 1.5rem 0;
+}
+
+/* ── LOCK ICON WRAPPER ── */
+.lock-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(232,25,44,0.1);
+  border: 1px solid rgba(232,25,44,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+}
+
+/* ── FOOTER NOTE ── */
+.foot-note {
+  font-size: 11px;
+  color: var(--white-30);
+  text-align: center;
+  letter-spacing: 0.5px;
+  margin-top: 1.5rem;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">First Talent</div>
+        <div class="brand-sub">Evaluación de competencias</div>
+      </div>
+    </div>
+    <div class="badge-year">2026</div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ═══ INTRO ═══ -->
+    <div id="s-intro" class="scr on">
+      <div class="card">
+        <p class="section-label">Competencias digitales</p>
+        <h1 class="hero-title">Evaluación<br><span>Excel</span></h1>
+        <p class="hero-sub">Esta evaluación nos permite conocer tu manejo de Excel. No hay respuestas perfectas — solo queremos entender tu nivel actual. Tarda aproximadamente 8 minutos.</p>
+
+        <div class="dec-line"></div>
+
+        <div class="fld">
+          <label>Nombre completo</label>
+          <input type="text" id="i-name" placeholder="Ej: María González">
+        </div>
+        <div class="fld">
+          <label>Área a la que te postulas</label>
+          <select id="i-area">
+            <option value="">Selecciona un área...</option>
+            <option>Recursos Humanos</option>
+            <option>Finanzas y Contabilidad</option>
+            <option>Comercial / Ventas</option>
+            <option>Operaciones</option>
+            <option>Marketing</option>
+            <option>Logística</option>
+            <option>Tecnología</option>
+            <option>Otra área</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label>Correo electrónico</label>
+          <input type="email" id="i-email" placeholder="tucorreo@ejemplo.com">
+        </div>
+        <div id="i-err" class="err" style="display:none;">Completa todos los campos para continuar.</div>
+        <button class="btn pri btn-full" style="margin-top:1rem;" onclick="startQ()">Comenzar evaluación →</button>
+      </div>
+    </div>
+
+    <!-- ═══ QUIZ ═══ -->
+    <div id="s-quiz" class="scr">
+      <div class="prog-wrap">
+        <div class="prog-meta">
+          <span class="prog-label" id="q-cnt"></span>
+          <span class="prog-lvl" id="q-lvl"></span>
+        </div>
+        <div class="pb"><div class="pf" id="prog"></div></div>
+      </div>
+      <div id="q-area"></div>
+    </div>
+
+    <!-- ═══ EJERCICIO PRÁCTICO ═══ -->
+    <div id="s-prac" class="scr">
+      <div class="card">
+        <p class="section-label">Sección final · Ejercicio práctico</p>
+        <h2 style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px;margin-bottom:0.5rem;">Caso real</h2>
+        <p style="font-size:13px;color:var(--white-70);margin-bottom:1.25rem;line-height:1.6;font-weight:300;">No hay respuesta correcta única — queremos conocer tu forma de pensar.</p>
+
+        <div class="hint">
+          Tienes una tabla con 500 filas: <strong style="color:var(--white);">Fecha, Vendedor, Región, Producto y Valor de venta.</strong> Tu jefe te pide el total de ventas por región, solo de marzo.
+        </div>
+
+        <div class="fld">
+          <div class="field-title">¿Qué pasos seguirías? Menciona herramientas o fórmulas.</div>
+          <textarea id="p-a1" rows="4" placeholder="Ej: Usaría una tabla dinámica filtrando por fecha de marzo y agrupando por región..."></textarea>
+        </div>
+        <div class="fld">
+          <div class="field-title">¿Usarías IA para resolver esto? ¿Por qué sí o no?</div>
+          <textarea id="p-a2" rows="3" placeholder="Comparte tu reflexión honesta..."></textarea>
+        </div>
+        <div id="p-err" class="err" style="display:none;">Por favor responde ambas preguntas.</div>
+        <button class="btn pri btn-full" style="margin-top:1rem;" onclick="finish()">Enviar evaluación →</button>
+      </div>
+    </div>
+
+    <!-- ═══ GRACIAS ═══ -->
+    <div id="s-thanks" class="scr">
+      <div class="card" style="text-align:center;padding:2.5rem 1.75rem;">
+        <div class="thanks-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M5 13l4 4L19 7" stroke="#4ADE80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:36px;letter-spacing:2px;margin-bottom:0.5rem;">
+          ¡Gracias, <span style="color:var(--red);" id="t-name"></span>!
+        </div>
+        <p style="font-size:14px;color:var(--white-70);line-height:1.75;margin-bottom:1.5rem;font-weight:300;">Tu evaluación fue registrada exitosamente. Nuestro equipo de selección revisará tus respuestas y se pondrá en contacto contigo próximamente.<br><br>En First Talent valoramos tu tiempo y tu talento. ¡Mucho éxito en este proceso!</p>
+        <div class="dec-line"></div>
+        <p style="font-size:11px;color:var(--white-30);letter-spacing:0.5px;">First Talent · Proceso de selección de practicantes 2026</p>
+      </div>
+      <div style="text-align:center;margin-top:1rem;">
+        <button class="btn" style="font-size:12px;letter-spacing:0.5px;" onclick="show('s-pin')">Acceso evaluador</button>
+      </div>
+    </div>
+
+    <!-- ═══ PIN ═══ -->
+    <div id="s-pin" class="scr">
+      <div class="card" style="text-align:center;padding:2.25rem 1.5rem;">
+        <div class="lock-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="11" width="18" height="11" rx="2" stroke="#E8192C" stroke-width="1.5"/>
+            <path d="M7 11V7a5 5 0 0110 0v4" stroke="#E8192C" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;margin-bottom:4px;">Acceso evaluador</div>
+        <div style="font-size:13px;color:var(--white-70);margin-bottom:1.25rem;font-weight:300;">Ingresa tu PIN para ver los resultados</div>
+        <input class="pin-box" type="password" id="pin-i" maxlength="4" placeholder="····" oninput="document.getElementById('pin-err').style.display='none'">
+        <div id="pin-err" class="err" style="display:none;">PIN incorrecto.</div>
+        <button class="btn pri" style="min-width:150px;margin-top:1rem;" onclick="checkPin()">Ver resultados →</button>
+      </div>
+    </div>
+
+    <!-- ═══ RESULTADOS ═══ -->
+    <div id="s-res" class="scr">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px;">Resultados</div>
+          <div style="font-size:12px;color:var(--white-30);font-family:'DM Mono',monospace;">Panel de evaluación</div>
+        </div>
+        <button class="btn" style="font-size:12px;" onclick="show('s-pin')">← Cerrar</button>
+      </div>
+      <div id="r-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const PIN = "2026";
+const QS = [
+  {l:"Básico",t:"¿Cuál es el atajo de teclado para guardar un archivo en Excel?",o:["Ctrl + G","Ctrl + S o Ctrl + G","Alt + F4","F12"],c:1},
+  {l:"Básico",t:"¿Cómo se llama la barra donde escribes las fórmulas en Excel?",o:["Barra de menú","Barra de fórmulas","Barra de herramientas","Barra de estado"],c:1},
+  {l:"Básico",t:"¿Qué resultado da la fórmula =SUMA(2,3,5)?",o:["235","10","23","Error"],c:1},
+  {l:"Básico",t:"Si tienes números en A1:A5, ¿cuál fórmula calcula el promedio?",o:["=SUMA(A1:A5)","=PROMEDIO(A1:A5)","=CONTAR(A1:A5)","=MAX(A1:A5)"],c:1},
+  {l:"Básico",t:"¿Qué hace la tecla F2 sobre una celda seleccionada?",o:["Elimina el contenido","Permite editar directamente el contenido de la celda","Copia la celda","Abre el menú formato"],c:1},
+  {l:"Intermedio",t:"Tienes nombres en la columna A. ¿Qué fórmula cuenta cuántas veces aparece 'Ana'?",o:["=CONTAR(A:A)","=CONTARSI(A:A,\"Ana\")","=BUSCARV(\"Ana\",A:A,1,0)","=SUMA(A:A=\"Ana\")"],c:1},
+  {l:"Intermedio",t:"¿Cuál es la diferencia entre $A$1 y A1 en una fórmula?",o:["No hay diferencia real","$A$1 no cambia al copiar; A1 se ajusta automáticamente","A1 suma valores; $A$1 los fija en cero","$A$1 solo funciona en tablas dinámicas"],c:1},
+  {l:"Intermedio",t:"Necesitas traer el salario de un empleado buscando su ID en otra tabla. ¿Qué función usarías?",o:["SUMAR.SI","BUSCARV o BUSCARX","CONTAR.SI.CONJUNTO","TRANSPONER"],c:1},
+  {l:"Intermedio",t:"¿Para qué sirve el formato condicional?",o:["Para cambiar el tipo de letra permanentemente","Para resaltar celdas automáticamente según reglas o valores","Para proteger celdas con contraseña","Para ordenar datos alfabéticamente"],c:1},
+  {l:"Intermedio",t:"¿Qué hace =SI.ERROR(BUSCARV(A1,B:C,2,0),\"No encontrado\")?",o:["Hace más rápido el BUSCARV","Muestra 'No encontrado' en lugar de un error si el valor no existe","Bloquea la celda si falla la búsqueda","Convierte el error en cero"],c:1},
+  {l:"Avanzado",t:"¿Qué ventaja clave tiene BUSCARX sobre BUSCARV?",o:["Es más rápida en archivos con muchas filas","Busca en cualquier dirección y no requiere especificar número de columna","Solo funciona en Office 365","No tiene ventajas reales"],c:1},
+  {l:"Avanzado",t:"Tienes 10.000 filas y necesitas resumir ventas por región y producto. ¿Cuál es la herramienta más eficiente?",o:["SUMAR.SI.CONJUNTO en cada celda","Tabla dinámica (pivot table)","Copiar y pegar datos filtrados","La función TRANSPONER"],c:1},
+  {l:"Avanzado",t:"¿Qué hace Power Query en Excel?",o:["Crea gráficos avanzados automáticamente","Permite importar, transformar y limpiar datos de múltiples fuentes sin escribir fórmulas","Ejecuta macros de VBA más rápido","Es un complemento para hacer presentaciones"],c:1},
+  {l:"Experto",t:"Un colega usó ChatGPT para generar una fórmula compleja. Funciona, pero no entiende qué hace. ¿Cuál es tu postura?",o:["Perfecto, lo importante es que funcione","Válido como punto de partida, pero debe entender la fórmula antes de usarla en datos reales","La IA nunca genera fórmulas correctas","Solo los expertos pueden usar IA"],c:1},
+  {l:"Experto",t:"¿Cuál describe mejor a alguien con nivel experto en Excel?",o:["Siempre busca en Google cómo hacer un BUSCARV básico","Construye modelos con relaciones entre tablas usando Power Query y tablas dinámicas de forma autónoma","Sabe insertar gráficos de barras","Usa fórmulas copiadas sin modificarlas"],c:1}
+];
+
+const LEVELS = ["Básico","Básico","Básico","Básico","Básico","Intermedio","Intermedio","Intermedio","Intermedio","Intermedio","Avanzado","Avanzado","Avanzado","Experto","Experto"];
+
+let cur = 0, ans = [], user = {}, results = [];
+
+function show(id) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('on');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startQ() {
+  const n = document.getElementById('i-name').value.trim();
+  const a = document.getElementById('i-area').value;
+  const e = document.getElementById('i-email').value.trim();
+  if (!n || !a || !e) { document.getElementById('i-err').style.display = 'block'; return; }
+  document.getElementById('i-err').style.display = 'none';
+  user = { name: n, area: a, email: e };
+  cur = 0; ans = [];
+  show('s-quiz'); renderQ();
+}
+
+function renderQ() {
+  const q = QS[cur];
+  const pct = Math.round(((cur + 1) / QS.length) * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('q-cnt').textContent = 'Pregunta ' + (cur + 1) + ' de ' + QS.length;
+  document.getElementById('q-lvl').textContent = q.l;
+  const L = ['A','B','C','D'];
+  document.getElementById('q-area').innerHTML = `
+    <div class="card">
+      <div class="qt">${q.t}</div>
+      <div class="opts">
+        ${q.o.map((o,i) => `
+          <div class="opt ${ans[cur]===i?'sel':''}" onclick="sel(${i})">
+            <div class="ol">${L[i]}</div>
+            <div class="ot">${o}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn" onclick="prev()" ${cur===0?'disabled':''}>← Anterior</button>
+      <span class="nav-count">${cur+1} / ${QS.length}</span>
+      ${cur < QS.length - 1
+        ? `<button class="btn pri" onclick="nxt()" ${ans[cur]===undefined?'disabled':''}>Siguiente →</button>`
+        : `<button class="btn pri" onclick="show('s-prac')" ${ans[cur]===undefined?'disabled':''}>Ejercicio final →</button>`}
+    </div>`;
+}
+
+function sel(i) { ans[cur] = i; renderQ(); }
+function nxt() { if (ans[cur] === undefined) return; cur++; renderQ(); }
+function prev() { if (cur > 0) { cur--; renderQ(); } }
+
+function finish() {
+  const a1 = document.getElementById('p-a1').value.trim();
+  const a2 = document.getElementById('p-a2').value.trim();
+  if (!a1 || !a2) { document.getElementById('p-err').style.display = 'block'; return; }
+  document.getElementById('p-err').style.display = 'none';
+
+  const score = ans.reduce((acc, a, i) => acc + (a === QS[i].c ? 1 : 0), 0);
+  const pct = Math.round((score / QS.length) * 100);
+  let lvl, ldesc, recos, lc, lt;
+
+  if (score <= 5) {
+    lvl = "Básico"; lc = "rgba(255,255,255,0.08)"; lt = "#fff";
+    ldesc = "Maneja funciones elementales. Requiere acompañamiento en tareas analíticas.";
+    recos = ["Capacitar en fórmulas intermedias (BUSCARV, SUMAR.SI, SI anidado)","Asignar tareas con supervisión directa","Evaluar si usa IA como sustituto del aprendizaje"];
+  } else if (score <= 9) {
+    lvl = "Intermedio"; lc = "rgba(232,25,44,0.15)"; lt = "#E8192C";
+    ldesc = "Domina las funciones más usadas. Puede trabajar con datos con supervisión puntual.";
+    recos = ["Reforzar tablas dinámicas y Power Query","Fomentar criterio propio antes de apoyarse en IA","Proyectos analíticos con seguimiento periódico"];
+  } else if (score <= 12) {
+    lvl = "Avanzado"; lc = "rgba(255,165,0,0.12)"; lt = "#FFA500";
+    ldesc = "Domina Excel a nivel funcional alto. Puede asumir tareas analíticas con autonomía.";
+    recos = ["Explorar Power BI o automatización con macros","Liderar análisis de datos en el área","Fortalecer buenas prácticas al usar IA"];
+  } else {
+    lvl = "Experto"; lc = "rgba(74,222,128,0.12)"; lt = "#4ADE80";
+    ldesc = "Perfil excepcional. Domina Excel integralmente y usa la IA con criterio y responsabilidad.";
+    recos = ["Ideal para roles de análisis de datos","Puede guiar a otros practicantes","Evaluar conocimientos complementarios en Power BI o Python"];
+  }
+
+  const init = user.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  const lvlScores = {};
+  ["Básico","Intermedio","Avanzado","Experto"].forEach(lv => lvlScores[lv] = { c: 0, t: 0 });
+  ans.forEach((a, i) => {
+    const lv = LEVELS[i]; lvlScores[lv].t++;
+    if (a === QS[i].c) lvlScores[lv].c++;
+  });
+
+  results.push({ ...user, score, pct, lvl, ldesc, recos, lc, lt, init, a1, a2, lvlScores });
+  document.getElementById('t-name').textContent = user.name.split(' ')[0];
+  show('s-thanks');
+
+  // ── ENVIAR A GOOGLE SHEETS ──
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbzAibD11avnoc3Jx8MGeaFuXT67bkSpVTiw8qry3vO-Or_Og4G9vc0zzcYun2IEEPQD/exec";
+  const payload = {
+    name:       user.name,
+    area:       user.area,
+    email:      user.email,
+    score:      score,
+    pct:        pct,
+    lvl:        lvl,
+    basico:     lvlScores["Básico"].c    + "/" + lvlScores["Básico"].t,
+    intermedio: lvlScores["Intermedio"].c + "/" + lvlScores["Intermedio"].t,
+    avanzado:   lvlScores["Avanzado"].c  + "/" + lvlScores["Avanzado"].t,
+    experto:    lvlScores["Experto"].c   + "/" + lvlScores["Experto"].t,
+    a1:         a1,
+    a2:         a2,
+    ts:         new Date().toISOString()
+  };
+
+  function sendToSheet(data, attempt) {
+    attempt = attempt || 1;
+    const params = new URLSearchParams(data);
+    const url = SHEET_URL + "?" + params.toString();
+
+    // Método 1: fetch no-cors (principal)
+    fetch(url, { method: "GET", mode: "no-cors" })
+      .catch(function() {
+        // Método 2: imagen como fallback si fetch falla
+        if (attempt < 3) {
+          setTimeout(function() { sendToSheet(data, attempt + 1); }, 1500 * attempt);
+        } else {
+          var img = new Image();
+          img.src = url;
+        }
+      });
+  }
+
+  sendToSheet(payload);
+}
+
+function checkPin() {
+  if (document.getElementById('pin-i').value === PIN) showRes();
+  else document.getElementById('pin-err').style.display = 'block';
+}
+
+function showRes() {
+  show('s-res');
+  const c = document.getElementById('r-list');
+  if (!results.length) {
+    c.innerHTML = '<div class="card" style="text-align:center;font-size:14px;color:rgba(255,255,255,0.4);padding:2rem;">Aún no hay evaluaciones en esta sesión.</div>';
+    return;
+  }
+  c.innerHTML = results.map(r => `
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.25rem;">
+        <div class="avatar">${r.init}</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:600;color:var(--white);">${r.name}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);font-family:'DM Mono',monospace;margin-top:2px;">${r.area} · ${r.email}</div>
+        </div>
+        <span class="lbadge" style="background:${r.lc};color:${r.lt};border:1px solid ${r.lt}40;">${r.lvl}</span>
+      </div>
+      <div class="mg">
+        <div class="mc"><div class="mn">${r.score}/${QS.length}</div><div class="ml">Correctas</div></div>
+        <div class="mc"><div class="mn">${r.pct}%</div><div class="ml">Porcentaje</div></div>
+        <div class="mc"><div class="mn" style="font-size:18px;letter-spacing:0;">${r.lvl}</div><div class="ml">Nivel</div></div>
+      </div>
+      ${["Básico","Intermedio","Avanzado","Experto"].map(lv => {
+        const s = r.lvlScores[lv]; const p = s.t > 0 ? Math.round((s.c/s.t)*100) : 0;
+        return `<div class="sl"><span>${lv}</span><span>${s.c}/${s.t} · ${p}%</span></div>
+                <div class="bw"><div class="bb"><div class="bf" style="width:${p}%"></div></div></div>`;
+      }).join('')}
+      <div class="dvd"></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:6px;">Ejercicio práctico</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:1rem;">${r.a1}</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:6px;">Postura frente a la IA</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:1rem;">${r.a2}</div>
+      <div class="dvd"></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:10px;">Recomendaciones para el área</div>
+      ${r.recos.map(rc => `<div class="reco-i"><div class="rdot"></div>${rc}</div>`).join('')}
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
